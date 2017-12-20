@@ -1,4 +1,29 @@
-# Strip HTML tags from strings
+# DEPRECATED
+
+This project and its [related](https://github.com/grokify/html-strip-tags-go) [projects](https://gist.github.com/christopherhesse/d422447a086d373a967f) sound like a good idea, but really aren't.
+
+Using the `stripTags` function could be dangerous. From https://golang.org/pkg/html/template/#hdr-Security_Model:
+
+> This package assumes that template authors are trusted
+
+`stripTags` resides within `html/template` and works according to those guaranties. Which might mean, that certain XSS attacks might go through undetected.
+
+A fast, reliable and already battle-worn library to strip HTML tags is [bluemonday](https://github.com/microcosm-cc/bluemonday).
+
+They've got the `bluemonday.StrictPolicy()` mode:
+
+> `bluemonday.StrictPolicy()`is a mode which can be thought of as equivalent to stripping all HTML elements and their attributes as it has nothing on it's whitelist. An example usage scenario would be blog post titles where HTML tags are not expected at all and if they are then the elements and the content of the elements should be stripped. This is a very strict policy.
+
+Example:
+
+```golang
+stripped := bluemonday.StrictPolicy().SanitizeBytes(`<a onblur="alert(secret)" href="http://www.google.com">Google</a>`)
+// Output: Google
+```
+
+That is exactly what you want when stripping arbitrary HTML content. A library, which understands XSS attacks and knows how to defuse these attacks. Even to the point of stripping *all* tags, leaving only plain text.
+
+## Strip HTML tags from strings
 
 [![GoDoc](https://godoc.org/github.com/denisbrodbeck/striphtmltags?status.svg)](https://godoc.org/github.com/denisbrodbeck/striphtmltags) [![Go Report Card](https://goreportcard.com/badge/github.com/denisbrodbeck/striphtmltags)](https://goreportcard.com/report/github.com/denisbrodbeck/striphtmltags)
 
